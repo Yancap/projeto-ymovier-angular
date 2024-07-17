@@ -12,3 +12,35 @@ header {
     }
   }
 }
+
+footer {
+
+  background: #333333;
+  span {
+    color: #575757;
+    padding: 1rem 0;
+    display: inline-block;
+  }
+  app-navbar {
+    display: none;
+  }
+}
+
+
+@media screen and (max-width: 540px) {
+  header {
+    padding: 1.5rem 0;
+    app-navbar {
+      display: none;
+    }
+  }
+
+  footer {
+    span {
+      display: none;
+    }
+    app-navbar {
+      display: inline;
+    }
+  }
+}
