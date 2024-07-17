@@ -1,0 +1,24 @@
+nav {
+  display: flex;
+  gap: 1rem;
+}
+
+span {
+  color: #FFFFFF;
+  font-size: 1.25rem;
+}
+
+a {
+  text-decoration: none;
+  display: inline-block;
+  padding: 1.5rem 2px calc(1.5rem + 2px);
+  cursor: pointer;
+
+   &:hover, &.active {
+    padding: 1.5rem 2px;
+    border-bottom: 2px solid #B90504;
+    span {
+      font-weight: 500;
+    }
+  }
+}

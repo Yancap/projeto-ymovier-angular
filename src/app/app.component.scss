@@ -1,0 +1,14 @@
+header {
+  background: #333333;
+
+  div.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 4rem;
+    }
+  }
+}
