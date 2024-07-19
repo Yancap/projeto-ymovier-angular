@@ -1,0 +1,45 @@
+<main>
+  <section>
+    <div>
+      <div class="container">
+        <section class="section-header">
+          <h1>Catálogo</h1>
+        </section>
+        <section class="section-floating">
+          <div>
+            <div class="heading">
+              <h2>Principais Filmes</h2>
+              <!-- <Search /> -->
+            </div>
+            <app-container-card>
+              <app-card />
+            </app-container-card>
+            <!-- <ContainerCard>
+              {movies && movies.map(movie => (
+              <Card
+                key="{movie.title}"
+                movie="{movie}"
+                setModal="{setModal}"
+                setDataModal="{setDataModal}"
+              />
+              ))}
+            </ContainerCard> -->
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+  <section class="section-film">
+    <div class="container">
+      <div class="heading">
+        <h2>Filmes de Ação</h2>
+      </div>
+      <!-- <ContainerCard>
+        {movies && movies.filter(movie => movie.gender.includes("Ação"))
+        .map(movie => (
+          <Card key={movie.title} movie={movie} setModal={setModal} setDataModal={setDataModal}/>
+        ))}
+      </ContainerCard> -->
+    </div>
+  </section>
+</main>
