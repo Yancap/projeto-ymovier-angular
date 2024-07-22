@@ -1,4 +1,9 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 
 @Component({
   selector: 'app-container-card',
@@ -7,11 +12,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
   templateUrl: './container-card.component.html',
   styleUrl: './container-card.component.scss',
 })
-export class ContainerCardComponent implements OnInit {
+export class ContainerCardComponent implements AfterViewInit {
   @ViewChild('containerCard') containerCard!: ElementRef<HTMLInputElement>;
   @ViewChild('leftArrow') leftArrow!: ElementRef<HTMLInputElement>;
+  public movies!: Movie[];
 
-  public ngOnInit() {
+  public ngAfterViewInit() {
     if (this.containerCard.nativeElement?.scrollLeft === 0) {
       if (this.leftArrow.nativeElement) {
         this.leftArrow.nativeElement.style.display = 'none';
@@ -23,7 +29,11 @@ export class ContainerCardComponent implements OnInit {
     }
   }
 
-  public handleScrollLeft(event: any, action: string = 'none') {
+  public onScroll() {
+    if (window.innerWidth > 480) this.handleScrollLeft('no-scroll');
+  }
+
+  public handleScrollLeft(action: string = 'none') {
     if (this.containerCard.nativeElement) {
       if (this.containerCard.nativeElement.scrollLeft === 0) {
         if (this.leftArrow.nativeElement) {

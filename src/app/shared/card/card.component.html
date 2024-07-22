@@ -1,15 +1,15 @@
 <div class="card">
   <figure class="image">
-    <img src="/poster.webp" alt="movie.poster.alt" />
+    <img [src]="movie.poster.url" [alt]="movie.poster.alt" />
   </figure>
   <article class="content">
     <div>
-      <h3>Filme de Terror Aleatório</h3>
-      <span>2020</span>
+      <h3>{{ movie.title }}</h3>
+      <span>{{ movie.year }}</span>
     </div>
     <footer>
-      <span>Terror, Horror</span>
-      <span>85/100</span>
+      <span>{{ movie.gender }}</span>
+      <span>{{ movie.review }}/100</span>
     </footer>
   </article>
 </div>

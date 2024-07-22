@@ -1,17 +1,13 @@
 <div class="container-main">
-  <div
-    class="left-arrow"
-    onPointerDown="{handleScrollLeft}"
-    #leftArrow
-  >
+  <div class="left-arrow" (click)="handleScrollLeft()" #leftArrow>
     <div>
       <img src="/arrow.svg" alt="left" height="18" width="18" />
     </div>
   </div>
-  <div class="container-card" #containerCard>
+  <div class="container-card" (scroll)="onScroll()" #containerCard>
     <ng-content select="app-card"></ng-content>
   </div>
-  <div class="right-arrow" onPointerDown="{handleScrollRight}">
+  <div class="right-arrow" (click)="handleScrollRight()">
     <div>
       <img src="/arrow.svg" alt="left" height="18" width="18" />
     </div>

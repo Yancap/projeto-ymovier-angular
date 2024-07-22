@@ -12,18 +12,10 @@
               <!-- <Search /> -->
             </div>
             <app-container-card>
-              <app-card />
+              @for (item of movies; track $index) {
+              <app-card [movie]="item" />
+              }
             </app-container-card>
-            <!-- <ContainerCard>
-              {movies && movies.map(movie => (
-              <Card
-                key="{movie.title}"
-                movie="{movie}"
-                setModal="{setModal}"
-                setDataModal="{setDataModal}"
-              />
-              ))}
-            </ContainerCard> -->
           </div>
         </section>
       </div>
@@ -34,12 +26,12 @@
       <div class="heading">
         <h2>Filmes de Ação</h2>
       </div>
-      <!-- <ContainerCard>
-        {movies && movies.filter(movie => movie.gender.includes("Ação"))
-        .map(movie => (
-          <Card key={movie.title} movie={movie} setModal={setModal} setDataModal={setDataModal}/>
-        ))}
-      </ContainerCard> -->
+      <app-container-card>
+        @for (item of filterGenderPipe.transform(movies, 'Ação'); track $index)
+        {
+        <app-card [movie]="item" />
+        }
+      </app-container-card>
     </div>
   </section>
 </main>
