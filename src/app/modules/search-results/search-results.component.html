@@ -1,0 +1,24 @@
+<main id="main-search-results">
+  <section>
+    <div>
+      <div class="container">
+        <section class="section_header">
+          <h1>Resultados</h1>
+        </section>
+        <section class="section_floating">
+          <div>
+            <div class="heading">
+              <h2></h2>
+              <app-search />
+            </div>
+            <div class="container_results">
+              @for (item of movies; track $index) {
+              <app-card [movie]="item" />
+              }
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>

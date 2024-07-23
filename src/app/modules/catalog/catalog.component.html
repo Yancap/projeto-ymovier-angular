@@ -9,7 +9,7 @@
           <div>
             <div class="heading">
               <h2>Principais Filmes</h2>
-              <!-- <Search /> -->
+              <app-search />
             </div>
             <app-container-card>
               @for (item of movies; track $index) {
@@ -28,6 +28,19 @@
       </div>
       <app-container-card>
         @for (item of filterGenderPipe.transform(movies, 'Ação'); track $index)
+        {
+        <app-card [movie]="item" />
+        }
+      </app-container-card>
+    </div>
+  </section>
+  <section class="section-film">
+    <div class="container">
+      <div class="heading">
+        <h2>Filmes de Terror</h2>
+      </div>
+      <app-container-card>
+        @for (item of filterGenderPipe.transform(movies, 'Terror'); track $index)
         {
         <app-card [movie]="item" />
         }

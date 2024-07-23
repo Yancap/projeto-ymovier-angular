@@ -1,0 +1,122 @@
+main {
+  flex-grow: 1;
+  flex-shrink: 1;
+  background: #232323;
+  padding-bottom: 4rem;
+  > section:nth-child(1) {
+    background-image: url("/background-catalog.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    > div {
+      background: linear-gradient(
+        180deg,
+        #232323 0%,
+        rgba(35, 35, 35, 0.43) 55.06%,
+        #232323 100%
+      );
+      backdrop-filter: blur(4px);
+    }
+  }
+}
+
+.section {
+  background: #232323;
+  padding: 4rem;
+}
+.section_header {
+  padding: 4rem 0;
+  margin: 0 auto;
+  text-align: center;
+
+  h1 {
+    color: white;
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 4rem 0;
+    h1 {
+      font-size: 4.5rem;
+    }
+  }
+}
+
+.section_floating {
+  @media (min-width: 768px) {
+    padding-bottom: 10rem;
+  }
+
+  > div {
+    z-index: 10;
+    width: calc(100% - 1rem);
+    @media (min-width: 640px) {
+      margin: 0 auto;
+      padding: 0 1rem;
+      @media (min-width: 640px) {
+        max-width: 32rem;
+      }
+      @media (min-width: 768px) {
+        max-width: 36rem;
+      }
+      @media (min-width: 1024px) {
+        max-width: 56rem;
+      }
+      @media (min-width: 1280px) {
+        max-width: 64rem;
+      }
+    }
+  }
+
+  .heading {
+    gap: 1rem;
+    flex-direction: column;
+    @media (min-width: 768px) {
+      flex-direction: row;
+    }
+    h2 {
+      order: 1;
+    }
+  }
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #aeaeae;
+  h2 {
+    color: white;
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+.container_results {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0;
+  justify-content: space-evenly;
+  width: 100%;
+  @media (min-width: 664px) {
+    justify-content: space-between;
+  }
+}
+
+:host {
+  ::ng-deep {
+    #main-search-results {
+      app-search,
+      app-search form {
+        display: flex;
+        width: 100% !important;
+      }
+      app-search input {
+        flex-grow: 1;
+      }
+    }
+  }
+}

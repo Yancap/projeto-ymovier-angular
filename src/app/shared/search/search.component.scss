@@ -1,0 +1,50 @@
+form {
+  display: flex;
+  width: 100%;
+  &:hover {
+    input {
+      opacity: 1;
+    }
+    button {
+      border-radius: 0px;
+      border-top-right-radius: 0.5rem /* 8px */;
+      border-bottom-right-radius: 0.5rem /* 8px */;
+    }
+  }
+  @media (min-width: 768px) {
+    width: auto;
+    order: 2;
+  }
+}
+
+input {
+  width: 100%;
+  border-bottom: 2px solid #6a6a6a;
+  background-color: transparent;
+  padding-bottom: 0.25rem;
+  color: #dedede;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: all 150ms;
+  @media (min-width: 768px) {
+    width: auto;
+    opacity: 0.1;
+  }
+  &:focus::placeholder {
+    color: #dedede;
+  }
+}
+
+button {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background-color: rgb(156 163 175 / 0.5);
+  padding: 0.5rem;
+  transition: all 150ms;
+  @media (min-width: 768px) {
+    border-radius: 9999px;
+  }
+  &:hover {
+    background-color: rgb(156 163 175);
+  }
+}
