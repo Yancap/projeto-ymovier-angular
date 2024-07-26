@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-container-card',
@@ -15,6 +10,7 @@ import {
 export class ContainerCardComponent implements AfterViewInit {
   @ViewChild('containerCard') containerCard!: ElementRef<HTMLInputElement>;
   @ViewChild('leftArrow') leftArrow!: ElementRef<HTMLInputElement>;
+  public isPressTimeout!: any;
   public movies!: Movie[];
 
   public ngAfterViewInit() {
@@ -45,20 +41,29 @@ export class ContainerCardComponent implements AfterViewInit {
         }
       }
       if (action !== 'no-scroll') {
-        this.containerCard.nativeElement.scrollBy({
-          left: -150,
-        });
+        this.isPressTimeout = setInterval(() => {
+          this.containerCard.nativeElement.scrollBy({
+            left: -3,
+          });
+        }, 1);
       }
     }
   }
   public handleScrollRight() {
+
     if (this.containerCard.nativeElement && window.screen.width > 480) {
       if (this.leftArrow.nativeElement) {
         this.leftArrow.nativeElement.style.display = 'flex';
       }
-      this.containerCard.nativeElement.scrollBy({
-        left: 150,
-      });
+      this.isPressTimeout = setInterval(() => {
+        this.containerCard.nativeElement.scrollBy({
+          left: 3,
+        });
+      }, 1);
     }
+  }
+
+  public handleMouseUp() {
+    clearInterval(this.isPressTimeout)
   }
 }

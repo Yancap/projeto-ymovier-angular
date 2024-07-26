@@ -16,7 +16,7 @@ export class CatalogComponent implements OnInit {
   public movies!: Movie[];
   public filterGenderPipe: FilterGenderPipe = new FilterGenderPipe();
 
-  constructor(private prismicService: PrismicService, private ngZone: NgZone) {}
+  constructor(private prismicService: PrismicService) {}
 
   public async ngOnInit() {
     const response = (await this.prismicService.instance.getAllByType(
