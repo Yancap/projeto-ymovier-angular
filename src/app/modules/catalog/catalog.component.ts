@@ -4,11 +4,12 @@ import { ContainerCardComponent } from '../../shared/container-card/container-ca
 import { CardComponent } from '../../shared/card/card.component';
 import { PrismicService } from '../../core/services/prismic/prismic.service';
 import { SearchComponent } from '../../shared/search/search.component';
+import { ModalComponent } from '../../shared/modal/modal.component';
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [ContainerCardComponent, CardComponent, FilterGenderPipe, SearchComponent],
+  imports: [ContainerCardComponent, CardComponent, FilterGenderPipe, SearchComponent, ModalComponent],
   templateUrl: './catalog.component.html',
   styleUrl: './catalog.component.scss',
 })

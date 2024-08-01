@@ -3,6 +3,7 @@ main {
   flex-shrink: 1;
   background: #232323;
   padding-bottom: 4rem;
+  position: relative;
   > section:nth-child(1) {
       background-image: url('/background-catalog.png');
       background-size: cover;

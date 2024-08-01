@@ -1,0 +1,78 @@
+@if (false) {
+<section class="section-modal">
+  <div
+    [style]="'background-color: ' + movie.main_color + 'B1;'"
+    class="container-film"
+  >
+    <img src="/close.svg" alt="X" height="20" width="20" />
+    <div class="film"></div>
+  </div>
+</section>
+} @else {
+<section
+  class="section-modal"
+  #sectionModal
+>
+  <div
+    class="container"
+    [style]="'background-color: ' + movie.main_color + 'B1;'"
+    #containerModal
+  >
+    <header>
+      <img src="/close.svg" alt="X" height="20" width="20" />
+    </header>
+    <div>
+      <figure class="post">
+        <img src="{{ movie.poster.url }}" alt="{{ movie.poster.alt }}" />
+      </figure>
+      <article class="container-info">
+        <header>
+          <div>
+            <h2>
+              {{ movie.title }}
+            </h2>
+            <span> ({{ movie.year }}) </span>
+          </div>
+          <div>
+            <span>
+              {{
+                movie.parental_rating === 0 ? "Livre" : movie.parental_rating
+              }}
+            </span>
+            <img src="/star.svg" alt="star" height="12" width="12" />
+            <span> {{ movie.gender }} </span>
+            <img src="/star.svg" alt="star" height="12" width="12" />
+            <span> {{ movie.runtime }} </span>
+          </div>
+        </header>
+        <div class="container-review">
+          <img src="/star.svg" alt="star" width="48" height="48" />
+          <span> {{ movie.review }} </span>
+        </div>
+        <div class="container-plot">
+          <h3>Sinopse</h3>
+          <p>{{ movie.plot }}</p>
+        </div>
+        <div class="container-production">
+          @for (person of movie.production; track $index) {
+          <div>
+            <h4>{{ person.name }}</h4>
+            <span>{{ person.role }}</span>
+          </div>
+          }
+        </div>
+        <button class="btn">
+          <img
+            src="/play.svg"
+            alt="play"
+            width="16"
+            height="20"
+            class="mt-px"
+          />
+          Assistir
+        </button>
+      </article>
+    </div>
+  </div>
+</section>
+}

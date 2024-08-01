@@ -40,11 +40,12 @@
         <h2>Filmes de Terror</h2>
       </div>
       <app-container-card>
-        @for (item of filterGenderPipe.transform(movies, 'Terror'); track $index)
-        {
+        @for (item of filterGenderPipe.transform(movies, 'Terror'); track
+        $index) {
         <app-card [movie]="item" />
         }
       </app-container-card>
     </div>
   </section>
+  @if(movies) {<app-modal [movie]="movies[0]" />}
 </main>

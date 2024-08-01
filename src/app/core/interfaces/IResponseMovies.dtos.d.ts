@@ -19,7 +19,7 @@ declare interface IMovie {
   production: {
     name: string;
     role: string;
-  };
+  }[];
   review: string;
   runtime: number;
   title: string;

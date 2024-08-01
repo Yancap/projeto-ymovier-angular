@@ -16,7 +16,7 @@ declare interface Movie {
   production: {
     name: string;
     role: string;
-  };
+  }[];
   review: string;
   runtime: string | number;
   title: string;

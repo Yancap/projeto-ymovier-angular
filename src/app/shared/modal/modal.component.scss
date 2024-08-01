@@ -1,0 +1,240 @@
+.section-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 50;
+  @media screen and (max-width: 768px) {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}
+
+.container,
+.container-film {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0.25rem;
+}
+
+.container-film {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 4rem 2rem 3rem;
+  img {
+    align-self: flex-end;
+    cursor: pointer;
+    transition: all 0.15s;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+  @media (max-width: 768px) {
+    padding: 1rem 2rem 1rem 2rem;
+  }
+}
+
+.film {
+  max-width: 100%;
+  height: 80vh;
+  flex-grow: 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  iframe {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.container {
+  padding: 0.5rem 2rem;
+  header {
+    display: flex;
+    justify-content: flex-end;
+    cursor: pointer;
+    padding-top: 0.5rem;
+  }
+  > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    height: 90vh;
+    max-width: 1124px;
+    padding: 2rem 0;
+    @media (min-width: 1024px) {
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      flex-wrap: nowrap;
+    }
+  }
+  @media (min-width: 1024px) {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.post {
+  display: none;
+  width: 33.333333%;
+  overflow: hidden;
+  img {
+    border-radius: 0.25rem;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.container-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-height: 100%;
+  padding: 1rem 0;
+  @media (min-width: 768px) {
+    width: 66.666667%;
+  }
+
+  header {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    div {
+      display: flex;
+      gap: 0.5rem;
+    }
+    div:nth-child(1) {
+      align-items: flex-end;
+      span {
+        display: none;
+        color: #aeaeae;
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        @media (min-width: 1024px) {
+          display: inline;
+        }
+      }
+    }
+    h2 {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    div:nth-child(2) {
+      border: 1px solid #ffffff;
+      background: #232323;
+      width: fit-content;
+      border-radius: 0.25rem;
+      mix-blend-mode: overlay;
+      span {
+        color: #ffffff;
+        padding: 0 6px;
+      }
+    }
+  }
+}
+
+.container-review {
+  width: max-content;
+  height: max-content;
+  display: none;
+  @media (min-width: 1024px) {
+    order: 2;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 0.25rem;
+    font-weight: 700;
+    font-size: 14px;
+  }
+}
+
+.container-plot {
+  order: 4;
+  @media (min-width: 1024px) {
+    order: 3;
+  }
+
+  h3 {
+    color: white;
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  p {
+    color: rgba(253, 253, 253, 0.795);
+  }
+}
+
+.container-production {
+  display: flex;
+  justify-content: space-between;
+  gap: 3.5rem;
+  order: 5;
+  @media (min-width: 1024px) {
+    order: 4;
+    justify-content: flex-start;
+  }
+
+  h4 {
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.75rem;
+  }
+
+  span {
+    font-weight: 300;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: rgb(209 213 219);
+  }
+}
+
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  order: 2;
+
+  border-radius: 0.375rem;
+  background-color: rgb(209 213 219);
+  padding: 0.5rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #232323;
+  mix-blend-mode: overlay;
+  transition: all 0.15s;
+  &:hover {
+    background-color: rgb(156 163 175);
+  }
+  @media (min-width: 1024px) {
+    order: 5;
+    align-self: flex-start;
+  }
+}

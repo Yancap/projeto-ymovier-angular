@@ -14,8 +14,8 @@ a {
   padding: 1.5rem 2px calc(1.5rem + 3px);
   cursor: pointer;
 
-   &:hover, &.active {
-    padding: 1.5rem 2px;
+   &:hover, &.active{
+    padding: 1.5rem 2px calc(1.5rem + .5px);
     border-bottom: 3px solid #B90504;
     span {
       font-weight: 500;
