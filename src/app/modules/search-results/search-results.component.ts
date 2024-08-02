@@ -1,10 +1,11 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { SearchComponent } from '../../shared/search/search.component';
 import { CardComponent } from '../../shared/card/card.component';
 import { PrismicService } from '../../core/services/prismic/prismic.service';
 import * as prismic from '@prismicio/client';
 import { Subscription } from 'rxjs';
+import { ModalService } from '../../core/services/modal/modal.service';
 
 @Component({
   selector: 'app-search-results',
@@ -16,9 +17,12 @@ import { Subscription } from 'rxjs';
 export class SearchResultsComponent implements OnInit, OnDestroy {
   public movies!: Movie[];
   public subscription!: Subscription;
+  @ViewChild('modal', { read: ViewContainerRef, static: true }) modalContainer!: ViewContainerRef;
+
   constructor(
     private prismicService: PrismicService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
@@ -51,6 +55,10 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
         },
       }));
     });
+  }
+
+  public ngAfterViewInit(): void {
+    this.modalService.viewContainerRef = this.modalContainer;
   }
 
   private queryByTags(query: string) {

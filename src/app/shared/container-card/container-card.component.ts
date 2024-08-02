@@ -9,8 +9,8 @@ import { ModalComponent } from '../modal/modal.component';
   styleUrl: './container-card.component.scss',
 })
 export class ContainerCardComponent implements AfterViewInit {
-  @ViewChild('containerCard') containerCard!: ElementRef<HTMLInputElement>;
-  @ViewChild('leftArrow') leftArrow!: ElementRef<HTMLInputElement>;
+  @ViewChild('containerCard') containerCard!: ElementRef<HTMLDivElement>;
+  @ViewChild('leftArrow') leftArrow!: ElementRef<HTMLDivElement>;
   public isPressTimeout!: any;
   public movies!: Movie[];
 

@@ -238,3 +238,12 @@
     align-self: flex-start;
   }
 }
+
+:host {
+  ::ng-deep {
+    iframe {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

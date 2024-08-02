@@ -16,22 +16,36 @@ import {
 })
 export class ModalComponent implements OnInit, AfterViewInit {
   @Input() public movie!: Movie;
+  @Input() public closeModal!: () => void;
   @ViewChild('sectionModal') sectionModal!: ElementRef<HTMLSelectElement>;
   @ViewChild('containerModal') containerModal!: ElementRef<HTMLDivElement>;
+  @ViewChild('iframeDiv') iframeDiv!: ElementRef<HTMLDivElement>;
+  public viewMovie = false;
 
+  constructor() {}
   ngOnInit(): void {}
 
   ngAfterViewInit(): void {
-
+    console.log(this.iframeDiv);
+    if (this.iframeDiv) {
+      this.iframeDiv.nativeElement.innerHTML = this.movie.iframe;
+    }
     if (this.sectionModal && this.containerModal) {
-      console.log(window.matchMedia('(max-width:768px)').matches);
-
       if (window.matchMedia('(max-width:768px)').matches) {
-        console.log(this.movie);
         this.sectionModal.nativeElement.style.backgroundImage = `url( ${this.movie.background.url} )`;
         this.containerModal.nativeElement.style.backgroundColor = `${this.movie.main_color}C1`;
-        console.log(this.sectionModal.nativeElement.style);
       }
     }
+  }
+
+  public watchMovie() {
+    this.viewMovie = true;
+    setTimeout(() => {
+      const iframeDiv = document.querySelector('div.film');
+
+      if (iframeDiv) {
+        iframeDiv.innerHTML = this.movie.iframe;
+      }
+    }, 1);
   }
 }
