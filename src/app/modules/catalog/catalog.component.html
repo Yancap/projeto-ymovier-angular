@@ -5,14 +5,41 @@
         <section class="section-header">
           <h1>Catálogo</h1>
         </section>
-        <section class="section-floating">
-          <div>
+        <section class="section-film">
+          <div class="">
             <div class="heading">
               <h2>Principais Filmes</h2>
               <app-search />
             </div>
             <app-container-card>
-              @for (item of movies; track $index) {
+              @for (item of filterGenderPipe.transform(movies, 'Ação'); track
+              $index) {
+              <app-card [movie]="item" />
+              }
+            </app-container-card>
+          </div>
+        </section>
+       <section class="section-film">
+          <div class="">
+            <div class="heading">
+              <h2>Filmes de Ação</h2>
+            </div>
+            <app-container-card>
+              @for (item of filterGenderPipe.transform(movies, 'Ação'); track
+              $index) {
+              <app-card [movie]="item" />
+              }
+            </app-container-card>
+          </div>
+        </section>
+        <section class="section-film">
+          <div class="">
+            <div class="heading">
+              <h2>Filmes de Terror</h2>
+            </div>
+            <app-container-card>
+              @for (item of filterGenderPipe.transform(movies, 'Terror'); track
+              $index) {
               <app-card [movie]="item" />
               }
             </app-container-card>
@@ -21,32 +48,6 @@
       </div>
     </div>
   </section>
-  <section class="section-film">
-    <div class="container">
-      <div class="heading">
-        <h2>Filmes de Ação</h2>
-      </div>
-      <app-container-card>
-        @for (item of filterGenderPipe.transform(movies, 'Ação'); track $index)
-        {
-        <app-card [movie]="item" />
-        }
-      </app-container-card>
-    </div>
-  </section>
-  <section class="section-film">
-    <div class="container">
-      <div class="heading">
-        <h2>Filmes de Terror</h2>
-      </div>
-      <app-container-card>
-        @for (item of filterGenderPipe.transform(movies, 'Terror'); track
-        $index) {
-        <app-card [movie]="item" />
-        }
-      </app-container-card>
-    </div>
-  </section>
   <!-- @if(movies) {<app-modal [movie]="movies[0]" />} -->
-   <div #modal></div>
+  <div #modal></div>
 </main>
