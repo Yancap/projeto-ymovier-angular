@@ -1,5 +1,12 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { SearchComponent } from '../../shared/search/search.component';
 import { CardComponent } from '../../shared/card/card.component';
 import { PrismicService } from '../../core/services/prismic/prismic.service';
@@ -17,45 +24,48 @@ import { ModalService } from '../../core/services/modal/modal.service';
 export class SearchResultsComponent implements OnInit, OnDestroy {
   public movies!: Movie[];
   public subscription!: Subscription;
-  @ViewChild('modal', { read: ViewContainerRef, static: true }) modalContainer!: ViewContainerRef;
+  @ViewChild('modal', { read: ViewContainerRef, static: true })
+  modalContainer!: ViewContainerRef;
 
   constructor(
     private prismicService: PrismicService,
     private route: ActivatedRoute,
     private modalService: ModalService
-  ) {}
+  ) {
+    afterNextRender(() => {
+      this.subscription = this.route.queryParams.subscribe(async (query) => {
+        const response = await Promise.all([
+          this.queryByTags(query['search']),
+          this.queryByTitles(query['search']),
+        ]);
+        const responseWithoutDuplicates = this.removeDuplicate([
+          ...response[0],
+          ...response[1],
+        ]);
 
-  ngOnInit() {
-    this.subscription = this.route.queryParams.subscribe(async (query) => {
-      const response = await Promise.all([
-        this.queryByTags(query['search']),
-        this.queryByTitles(query['search']),
-      ]);
-      const responseWithoutDuplicates = this.removeDuplicate([
-        ...response[0],
-        ...response[1],
-      ]);
-
-      this.movies = responseWithoutDuplicates.map((movie) => ({
-        slug: movie.uid,
-        ...movie.data,
-        gender: movie.data.gender.map((gen) => gen.type).join(', '),
-        runtime: movie.data.runtime
-          ? `${Math.floor(movie.data.runtime / 60)}h ${
-              movie.data.runtime - 60 * Math.floor(movie.data.runtime / 60)
-            }min`
-          : 0,
-        video: {
-          height: 'auto',
-          width: 'auto',
-          html: movie.data.video.html?.replace(
-            /(?:width|height)="(\d+)"/g,
-            'class="iframe" '
-          ),
-        },
-      }));
+        this.movies = responseWithoutDuplicates.map((movie) => ({
+          slug: movie.uid,
+          ...movie.data,
+          gender: movie.data.gender.map((gen) => gen.type).join(', '),
+          runtime: movie.data.runtime
+            ? `${Math.floor(movie.data.runtime / 60)}h ${
+                movie.data.runtime - 60 * Math.floor(movie.data.runtime / 60)
+              }min`
+            : 0,
+          video: {
+            height: 'auto',
+            width: 'auto',
+            html: movie.data.video.html?.replace(
+              /(?:width|height)="(\d+)"/g,
+              'class="iframe" '
+            ),
+          },
+        }));
+      });
     });
   }
+
+  ngOnInit() {}
 
   public ngAfterViewInit(): void {
     this.modalService.viewContainerRef = this.modalContainer;
