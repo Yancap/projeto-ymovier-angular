@@ -4,6 +4,7 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
+import { config } from 'dotenv';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -43,20 +44,49 @@ export function app(): express.Express {
       .catch((err) => next(err));
   });
 
+  server.post('/api/v1/test', (req, res) => {
+    let dotenv = config();
+    console.log(dotenv);
+  });
+
   server.post('/api/v1/auth', (req, res) => {
     const { body } = req;
-    console.log(req.headers);
-
-
-    if (!('client_id' in body && 'client_secret' in body && 'code' in body)) {
+    let dotenv = config().parsed;
+    if(!dotenv) {
       return res.status(404).send({
-        message: "O corpo da requisição está inválido",
-        field: "",
-        status: 404
+        message: 'Arquivo .env não configurado no servidor',
+        field: '',
+        type: 'error',
+        status: 500,
       });
     }
 
-    const bodyStringify = JSON.stringify({...body});
+    let client_id = dotenv['CLIENT_ID'];
+    let client_secret = dotenv['CLIENT_SECRET'];;
+
+    if (!('code' in body)) {
+      return res.status(404).send({
+        message: 'O corpo da requisição está inválido.',
+        field: '',
+        type: 'error',
+        status: 404,
+      });
+    }
+
+    if (!(client_id && client_secret)) {
+      return res.status(404).send({
+        message: 'As variaves de ambiente estão inválidas ou sem valor.',
+        field: '',
+        type: 'error',
+        status: 500,
+      });
+    }
+
+    const bodyStringify = JSON.stringify({
+      client_id,
+      client_secret,
+      code: body.code,
+    });
 
     return fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
@@ -69,16 +99,11 @@ export function app(): express.Express {
       },
     })
       .then((response) => {
-        res.status(response.status);
-        console.log(response.headers);
         return response.json();
       })
       .then((response) => {
-        console.log(response);
-
         return res.send(response);
-      })
-
+      });
   });
   return server;
 }

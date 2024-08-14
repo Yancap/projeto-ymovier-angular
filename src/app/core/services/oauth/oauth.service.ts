@@ -1,61 +1,105 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
-import { filter, of, ReplaySubject, Subscription, switchMap, tap } from 'rxjs';
+import { config } from 'dotenv';
+import {
+  BehaviorSubject,
+  catchError,
+  concatMap,
+  filter,
+  first,
+  map,
+  Observable,
+  of,
+  ReplaySubject,
+  Subscription,
+  switchMap,
+  take,
+  tap,
+  throwError,
+} from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OAuthService {
-  private readonly _client_id = 'Ov23liCeHvH2TP67FU5m'; //ca3cc27c2f25f109e0b1
-  private readonly _client_secret = 'c3d5d694fd46ed4bdd4b3129bb0cfc9839cb87e5'; //193b760fee0ee229aca7094a28f619cc80e527f4
-  private _redirect_uri: string = 'http://localhost:4000/';
-  private readonly _state = '123';
+  //private _redirect_uri: string = 'http://localhost:4000/';
+  private readonly _client_id = environment.client_id;
   private _authCode!: string;
+  public user: ReplaySubject<AuthenticatedUser> = new ReplaySubject(1);
+  public userBh: BehaviorSubject<AuthenticatedUser> = new BehaviorSubject({
+    name: '',
+    avatar_url: '',
+    email: '',
+    isAuthenticated: false.valueOf(),
+  });
+  public token$: ReplaySubject<string> = new ReplaySubject(1);
 
   constructor(private http: HttpClient, private router: Router) {}
 
   public getAuthCode({ url }: NavigationStart) {
     this._authCode = url.split('=')[1];
-    // const search = window.location.search;
-    // if (search) {
-    // }
   }
 
   public hasCodeQueryParam({ url }: NavigationStart) {
-    console.log(url);
-
     const regex = /^([^?&]*\?code=[^&]*)$/;
     return regex.test(url);
   }
 
   public autorize() {
-    this._redirect_uri = window.location.origin;
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${this._client_id}`; //&state=${this._state}
-
-    //return this.http.get(`https://github.com/login/oauth/authorize?client_id=${this._client_id}`)
+    //this._redirect_uri = window.location.origin;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${this._client_id}`;
   }
-  public checkAuth() {
+  public authenticate() {
+    const token = sessionStorage.getItem('token');
+    console.log(token);
+    if (token) {
+      return this.getUserData(token).pipe(
+        catchError((error: IResponseGithubOAuthError) => {
+          if ((error.status = '401')) {
+            sessionStorage.removeItem('token');
+            this.autorize();
+            return of();
+          }
+          tap(() =>
+            this.user.next({
+              name: '',
+              avatar_url: '',
+              email: '',
+              isAuthenticated: false,
+            })
+          );
+          return throwError(() => ({
+            message: 'Usuário ainda não autorizou!',
+          }));
+        })
+      );
+    }
+    return this.accessToken().pipe(
+      concatMap((data) => this.getUserData(data.access_token)),
+      tap((data) => sessionStorage.setItem('token', data.token))
+    );
+    //(data) => this.getUserData(data.access_token))
+  }
+
+  public accessToken() {
+    console.log('chamou accessToken 1');
+
     return this.router.events.pipe(
       filter((e) => e instanceof NavigationStart),
       switchMap((event) => {
-        const { url } = event
+        const { url } = event;
         const hasQueryParam = /^([^?&]*\?code=[^&]*)$/.test(url);
+        console.log(url);
+        console.log(hasQueryParam);
+
         if (hasQueryParam) {
           this._authCode = url.split('=')[1];
-          this.router.navigate([], {
-            queryParams: {
-              'yourParamName': null,
-              'youCanRemoveMultiple': null,
-            },
-            queryParamsHandling: 'merge'
-          }) //Remove Query Param
-          return this.http.post(
+          return this.http.post<IResponseGithubOAuth>(
             '/api/v1/auth',
             {
-              client_id: this._client_id,
-              client_secret: this._client_secret,
-              code: this._authCode
+              code: this._authCode,
             },
             {
               headers: {
@@ -63,13 +107,31 @@ export class OAuthService {
                 'Access-Control-Allow-Headers': 'X-Requested-With',
               },
             }
-          ).pipe(tap((data) => {
-            console.log(data);
-
-          }));
+          );
         }
-        return of();
+
+        return throwError(() => ({
+          message: 'Usuário ainda não autorizou!',
+        }));
       })
     );
   }
+
+  public getUserData(token: string) {
+    console.log('chamou getUserData');
+    return this.http
+      .get<IResponseAuthenticatedUser>('https://api.github.com/user', {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .pipe(
+        tap((user) => {
+          this.user.next({ ...user, isAuthenticated: true });
+        }),
+        map((user) => ({ ...user, token }))
+      );
+  }
+
+  private handleError(error: IResponseGithubOAuthError) {}
 }

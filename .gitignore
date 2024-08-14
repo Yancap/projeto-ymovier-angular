@@ -7,6 +7,7 @@
 /bazel-out
 
 TODO.md
+.env
 
 # Node
 /node_modules
