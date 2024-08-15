@@ -28,13 +28,6 @@ export class OAuthService {
   private readonly _client_id = environment.client_id;
   private _authCode!: string;
   public user: ReplaySubject<AuthenticatedUser> = new ReplaySubject(1);
-  public userBh: BehaviorSubject<AuthenticatedUser> = new BehaviorSubject({
-    name: '',
-    avatar_url: '',
-    email: '',
-    isAuthenticated: false.valueOf(),
-  });
-  public token$: ReplaySubject<string> = new ReplaySubject(1);
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -48,9 +41,19 @@ export class OAuthService {
   }
 
   public autorize() {
-    //this._redirect_uri = window.location.origin;
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${this._client_id}`;
   }
+
+  public logout() {
+    sessionStorage.removeItem('token');
+    this.user.next({
+      name: '',
+      email: '',
+      avatar_url: '',
+      isAuthenticated: false
+    });
+  }
+
   public authenticate() {
     const token = sessionStorage.getItem('token');
     console.log(token);
@@ -73,12 +76,20 @@ export class OAuthService {
           return throwError(() => ({
             message: 'Usuário ainda não autorizou!',
           }));
+        }),
+        tap((data) => {
+          console.log(data);
+          this.saveUserData(data.email).subscribe();
         })
       );
     }
     return this.accessToken().pipe(
       concatMap((data) => this.getUserData(data.access_token)),
-      tap((data) => sessionStorage.setItem('token', data.token))
+      tap((data) => sessionStorage.setItem('token', data.token)),
+      tap((data) => {
+        console.log(data);
+        this.saveUserData(data.email).subscribe();
+      })
     );
     //(data) => this.getUserData(data.access_token))
   }
@@ -127,9 +138,22 @@ export class OAuthService {
       })
       .pipe(
         tap((user) => {
+          console.log(user);
+
           this.user.next({ ...user, isAuthenticated: true });
         }),
         map((user) => ({ ...user, token }))
+      );
+  }
+
+  private saveUserData(email: string) {
+    return this.http
+      .post('/api/v1/save_user', {
+        email,
+      })
+      .pipe(
+        take(1),
+        catchError((err) => throwError(() => err))
       );
   }
 

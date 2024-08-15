@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { OAuthService } from '../../core/services/oauth/oauth.service';
 
 @Component({
@@ -9,20 +9,19 @@ import { OAuthService } from '../../core/services/oauth/oauth.service';
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
 })
-export class SignInComponent {
-  constructor(private oAuthService: OAuthService, private http: HttpClient) {}
-  async login() {
-    console.log('login 1');
-
+export class SignInComponent implements OnInit {
+  public user!: AuthenticatedUser;
+  constructor(private oAuthService: OAuthService) {}
+  ngOnInit(): void {
+    this.oAuthService.user.subscribe((user) => {
+      this.user = user;
+    })
+  }
+  public login() {
     this.oAuthService.autorize();
-
-    // this.http.post('/v1/api/auth', {}).subscribe((a) => {
-    //   console.log(a);
-
-    // })
-    //const json = await as.json()
-    //console.log(as);
   }
 
-  logout() {}
+  public logout() {
+    this.oAuthService.logout();
+  }
 }

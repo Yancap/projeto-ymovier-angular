@@ -1,3 +1,8 @@
-<button (click)="login()">
-  Entrar
+@if (!user || !user.isAuthenticated) {
+<button (click)="login()">Entrar</button>
+} @else {
+<button (click)="logout()">
+  <img src="/github.svg" alt="">
+  {{ user.name }}
 </button>
+}

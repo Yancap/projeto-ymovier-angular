@@ -3,8 +3,11 @@ import { CommonEngine } from '@angular/ssr';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import bootstrap from './src/main.server';
+import bootstrap from '../src/main.server';
 import { config } from 'dotenv';
+import { fauna } from './services/fauna';
+import { query } from 'faunadb';
+import { SignatureCollectionProps } from './interfaces/signature-collection-props';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -44,15 +47,10 @@ export function app(): express.Express {
       .catch((err) => next(err));
   });
 
-  server.post('/api/v1/test', (req, res) => {
-    let dotenv = config();
-    console.log(dotenv);
-  });
-
   server.post('/api/v1/auth', (req, res) => {
     const { body } = req;
     let dotenv = config().parsed;
-    if(!dotenv) {
+    if (!dotenv) {
       return res.status(404).send({
         message: 'Arquivo .env não configurado no servidor',
         field: '',
@@ -62,7 +60,7 @@ export function app(): express.Express {
     }
 
     let client_id = dotenv['CLIENT_ID'];
-    let client_secret = dotenv['CLIENT_SECRET'];;
+    let client_secret = dotenv['CLIENT_SECRET'];
 
     if (!('code' in body)) {
       return res.status(404).send({
@@ -104,6 +102,110 @@ export function app(): express.Express {
       .then((response) => {
         return res.send(response);
       });
+  });
+
+  server.post('/api/v1/save_user', async (req, res) => {
+    const { body } = req;
+    console.log('save_user');
+
+    if (!('email' in body)) {
+      return res.status(404).send({
+        message: 'O corpo da requisição está inválido.',
+        field: '',
+        type: 'error',
+        status: 404,
+      });
+    }
+
+    const { email } = body;
+    if (!email) {
+      return res.status(404).send({
+        message: 'Email inválido.',
+        description:
+          'Por favor, verifique se o seu e-mail está publico em seu Github.',
+        field: '',
+        type: 'error',
+        status: 404,
+      });
+    }
+
+    try {
+      await fauna.query(
+        query
+          .If(
+            query.Not(
+              query.Exists(
+                query.Match(
+                  query.Index('user_by_email'),
+                  query.Casefold(email as string)
+                )
+              )
+            ),
+            query.Create(query.Collection('users'), {
+              data: { email: email },
+            }),
+            query.Get(
+              query.Match(
+                query.Index('user_by_email'),
+                query.Casefold(email as string)
+              )
+            )
+          )
+      );
+
+      return res.status(201).send();
+    } catch (error) {
+      return res.status(404).send({
+        message:
+          'Aconteceu um erro no salvamento das informações do usuário no faunadb.',
+        field: '',
+        type: 'error',
+        error: error,
+        status: 404,
+      });
+    }
+  });
+
+  server.post('/api/v1/session', async (req, res) => {
+    const { body } = req;
+
+    if (!('email' in body)) {
+      return res.status(404).send({
+        message: 'O corpo da requisição está inválido.',
+        field: '',
+        type: 'error',
+        status: 404,
+      });
+    }
+    const { email } = body;
+    try {
+      const userActiveSignature = await fauna.query<SignatureCollectionProps>(
+        query.Get(
+          query.Intersection([
+            query.Match(
+              query.Index('signatures_by_user_ref'),
+              query.Select(
+                'ref',
+                query.Get(
+                  query.Match(
+                    query.Index('user_by_email'),
+                    query.Casefold(email)
+                  )
+                )
+              )
+            ),
+            query.Match(query.Index('signatures_by_status'), 'active'),
+          ])
+        )
+      );
+      return res.send({
+        activeSignature: userActiveSignature.data.status,
+      });
+    } catch (error) {
+      return res.send({
+        activeSignature: null,
+      });
+    }
   });
   return server;
 }
