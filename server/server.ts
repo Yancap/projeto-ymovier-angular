@@ -8,6 +8,11 @@ import { config } from 'dotenv';
 import { fauna } from './services/fauna';
 import { query } from 'faunadb';
 import { SignatureCollectionProps } from './interfaces/signature-collection-props';
+import { User } from './interfaces/user';
+import { stripe } from './services/stripe';
+import { buffer } from './services/buffer';
+import Stripe from 'stripe';
+import { saveSignature } from './services/saveSignature';
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -131,26 +136,25 @@ export function app(): express.Express {
 
     try {
       await fauna.query(
-        query
-          .If(
-            query.Not(
-              query.Exists(
-                query.Match(
-                  query.Index('user_by_email'),
-                  query.Casefold(email as string)
-                )
-              )
-            ),
-            query.Create(query.Collection('users'), {
-              data: { email: email },
-            }),
-            query.Get(
+        query.If(
+          query.Not(
+            query.Exists(
               query.Match(
                 query.Index('user_by_email'),
                 query.Casefold(email as string)
               )
             )
+          ),
+          query.Create(query.Collection('users'), {
+            data: { email: email },
+          }),
+          query.Get(
+            query.Match(
+              query.Index('user_by_email'),
+              query.Casefold(email as string)
+            )
           )
+        )
       );
 
       return res.status(201).send();
@@ -206,6 +210,139 @@ export function app(): express.Express {
         activeSignature: null,
       });
     }
+  });
+
+  server.post('/api/v1/signature', async (req, res) => {
+    const { body } = req;
+
+    let dotenv = config().parsed;
+    if (!dotenv) {
+      return res.status(404).send({
+        message: 'Arquivo .env não configurado no servidor',
+        field: '',
+        type: 'error',
+        status: 500,
+      });
+    }
+
+    if (!('email' in body)) {
+      return res.status(404).send({
+        message: 'O corpo da requisição está inválido.',
+        field: '',
+        type: 'error',
+        status: 404,
+      });
+    }
+    const { email } = body;
+
+    try {
+      const user = await fauna.query<User>(
+        query.Get(
+          query.Match(
+            query.Index('user_by_email'),
+            query.Casefold(email as string)
+          )
+        )
+      );
+      console.log(user);
+      let customerId = user.data.stripe_customer_id;
+      if (!customerId) {
+        const stripeCustomer = await stripe.customers.create({
+          email,
+        });
+        console.log(stripeCustomer);
+        await fauna.query(
+          query.Update(query.Ref(query.Collection('users'), user.ref.id), {
+            data: {
+              stripe_customer_id: stripeCustomer.id,
+            },
+          })
+        );
+        customerId = stripeCustomer.id;
+      }
+      const stripeCheckoutSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        billing_address_collection: 'auto',
+        line_items: [{ price: 'price_1NWTHPCGnWxAsuIluA7e1LWT', quantity: 1 }],
+        mode: 'subscription',
+        allow_promotion_codes: true,
+        success_url: dotenv['STRIPE_SUCCESS_URL'] as string,
+        cancel_url: dotenv['STRIPE_CANCEL_URL'] as string,
+      });
+      console.log(stripeCheckoutSession.id);
+      return res.status(201).send({ sessionId: stripeCheckoutSession.id });
+    } catch (error) {
+      return res.status(500).send({
+        error,
+      });
+    }
+  });
+
+  server.post('/api/v1/webhook', async (req, res) => {
+    const buf = await buffer(req);
+    let dotenv = config().parsed;
+    if (!dotenv) {
+      return res.status(404).send({
+        message: 'Arquivo .env não configurado no servidor',
+        field: '',
+        type: 'error',
+        status: 500,
+      });
+    }
+
+    let signature_return = '';
+    const secret = req.headers['stripe-signature'] as string | string[];
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        buf,
+        secret,
+        dotenv['STRIPE_WEBHOOK_SECRET'] as string
+      );
+
+      const relevantEvents = new Set([
+        'checkout.session.completed',
+        'customer.subscription.updated',
+        'customer.subscription.deleted',
+      ]);
+
+      const { type } = event;
+      if (relevantEvents.has(type)) {
+        try {
+          switch (type) {
+            case 'customer.subscription.updated':
+            case 'customer.subscription.deleted':
+              const signature = event.data.object as Stripe.Subscription;
+              signature_return = await saveSignature(
+                signature.id,
+                signature.customer.toString(),
+                false
+              );
+              break;
+            case 'checkout.session.completed':
+              const checkoutSession = event.data
+                .object as Stripe.Checkout.Session;
+              signature_return = await saveSignature(
+                checkoutSession.subscription?.toString() as string,
+                checkoutSession.customer?.toString() as string,
+                true
+              );
+              break;
+            default:
+              throw new Error('Unhandled event: ' + type);
+          }
+        } catch (error) {
+          return res.send({ error: 'Webhook handler failed.' });
+        }
+      }
+    } catch (error) {
+      return res.status(404).send('Webhook Error');
+    }
+    res.send({ received: true, signature: signature_return });
+    res.redirect('/');
+    return res;
   });
   return server;
 }
