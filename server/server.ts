@@ -22,7 +22,6 @@ export function app(): express.Express {
   const indexHtml = join(serverDistFolder, 'index.server.html');
 
   const commonEngine = new CommonEngine();
-  server.use(express.json());
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
 
@@ -48,9 +47,97 @@ export function app(): express.Express {
         publicPath: browserDistFolder,
         providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
       })
-      .then((html) => res.send(html))
-      .catch((err) => next(err));
+      .then((html: any) => res.send(html))
+      .catch((err: any) => next(err));
   });
+
+
+  server.post(
+    '/api/v1/webhook',
+    express.raw({ type: 'application/json' }),
+    async (req, res) => {
+      const buf = await buffer(req);
+      console.log('webhook received');
+
+      if('payload' in req) console.log(req['payload']);
+
+      let dotenv = config().parsed;
+      if (!dotenv) {
+        return res.status(404).send({
+          message: 'Arquivo .env não configurado no servidor',
+          field: '',
+          type: 'error',
+          status: 500,
+        });
+      }
+
+      let signature_return = '';
+      const secret = req.headers['stripe-signature'] as string | string[];
+      let event: Stripe.Event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          secret,
+          dotenv['STRIPE_WEBHOOK_SECRET'] as string
+        );
+
+        console.log('EVENT');
+
+        const relevantEvents = new Set([
+          'checkout.session.completed',
+          'customer.subscription.updated',
+          'customer.subscription.deleted',
+        ]);
+
+        const { type } = event;
+        if (relevantEvents.has(type)) {
+          try {
+            switch (type) {
+              case 'customer.subscription.updated':
+              case 'customer.subscription.deleted':
+                console.log('customer.subscription.updated');
+                const signature = event.data.object as Stripe.Subscription;
+                signature_return = await saveSignature(
+                  signature.id,
+                  signature.customer.toString(),
+                  false
+                );
+                break;
+              case 'checkout.session.completed':
+                console.log('customer.subscription.completed');
+                const checkoutSession = event.data
+                  .object as Stripe.Checkout.Session;
+                console.log(event.data.object);
+                signature_return = await saveSignature(
+                  checkoutSession.subscription?.toString() as string,
+                  checkoutSession.customer?.toString() as string,
+                  true
+                );
+                break;
+              default:
+                throw new Error('Unhandled event: ' + type);
+            }
+          } catch (error) {
+            console.log(error);
+
+            return res.send({ error: 'Webhook handler failed.' });
+          }
+        }
+      } catch (error) {
+        //console.log(error);
+        console.log('webhook error');
+
+        return res.status(404).send('Webhook Error');
+      }
+      res.send({ received: true, signature: signature_return });
+      // res.redirect('/');
+      return res;
+    }
+  );
+
+
+  server.use(express.json());
 
   server.post('/api/v1/auth', (req, res) => {
     const { body } = req;
@@ -279,71 +366,6 @@ export function app(): express.Express {
     }
   });
 
-  server.post('/api/v1/webhook', async (req, res) => {
-    const buf = await buffer(req);
-    let dotenv = config().parsed;
-    if (!dotenv) {
-      return res.status(404).send({
-        message: 'Arquivo .env não configurado no servidor',
-        field: '',
-        type: 'error',
-        status: 500,
-      });
-    }
-
-    let signature_return = '';
-    const secret = req.headers['stripe-signature'] as string | string[];
-    let event: Stripe.Event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        buf,
-        secret,
-        dotenv['STRIPE_WEBHOOK_SECRET'] as string
-      );
-
-      const relevantEvents = new Set([
-        'checkout.session.completed',
-        'customer.subscription.updated',
-        'customer.subscription.deleted',
-      ]);
-
-      const { type } = event;
-      if (relevantEvents.has(type)) {
-        try {
-          switch (type) {
-            case 'customer.subscription.updated':
-            case 'customer.subscription.deleted':
-              const signature = event.data.object as Stripe.Subscription;
-              signature_return = await saveSignature(
-                signature.id,
-                signature.customer.toString(),
-                false
-              );
-              break;
-            case 'checkout.session.completed':
-              const checkoutSession = event.data
-                .object as Stripe.Checkout.Session;
-              signature_return = await saveSignature(
-                checkoutSession.subscription?.toString() as string,
-                checkoutSession.customer?.toString() as string,
-                true
-              );
-              break;
-            default:
-              throw new Error('Unhandled event: ' + type);
-          }
-        } catch (error) {
-          return res.send({ error: 'Webhook handler failed.' });
-        }
-      }
-    } catch (error) {
-      return res.status(404).send('Webhook Error');
-    }
-    res.send({ received: true, signature: signature_return });
-    res.redirect('/');
-    return res;
-  });
   return server;
 }
 

@@ -1,49 +1,50 @@
-import { fauna } from "./fauna";
-import { stripe } from "./stripe";
-import { query } from "faunadb";
+import { fauna } from './fauna';
+import { stripe } from './stripe';
+import { query } from 'faunadb';
 
-export async function saveSignature(subscriptionId: string, customerId: string, createAction = false){
-    const userRef = await fauna.query(
-        query.Select(
-            "ref",
-            query.Get(
-                query.Match(
-                    query.Index('user_by_stripe_customer_id'),
-                    customerId
-                )
-            )
-        )
+export async function saveSignature(
+  subscriptionId: string,
+  customerId: string,
+  createAction = false
+) {
+
+  const userRef = await fauna.query(
+    query.Select(
+      'ref',
+      query.Get(
+        query.Match(query.Index('user_by_stripe_customer_id'), customerId)
+      )
     )
+  );
+  console.log('userRef');
 
-    const signature = await stripe.subscriptions.retrieve(subscriptionId)
-    const signatureData = {
-        id: signature.id,
-        user_id: userRef,
-        status: signature.status,
-        price_id: signature.items.data[0].price.id
-    }
 
-    if(createAction){
-        await fauna.query(
-            query.Create(
-                query.Collection('signatures'),
-                { data: signatureData }
-            )
-        )
-    } else {
-        fauna.query(
-            query.Replace(
-                query.Select(
-                    "ref",
-                    query.Get(
-                        query.Match(
-                            query.Index("signatures_by_id"),
-                            subscriptionId)
-                    )
-                ),
-                { data: signatureData }
-            )
-        )
-    }
-    return signatureData.status
+  const signature = await stripe.subscriptions.retrieve(subscriptionId);
+  const signatureData = {
+    id: signature.id,
+    user_id: userRef,
+    status: signature.status,
+    price_id: signature.items.data[0].price.id,
+  };
+
+  if (createAction) {
+    console.log('createAction');
+    await fauna.query(
+      query.Create(query.Collection('signatures'), { data: signatureData })
+    );
+  } else {
+    console.log('Not createAction');
+    await fauna.query(
+      query.Replace(
+        query.Select(
+          'ref',
+          query.Get(
+            query.Match(query.Index('signatures_by_id'), subscriptionId)
+          )
+        ),
+        { data: signatureData }
+      )
+    );
+  }
+  return signatureData.status;
 }
