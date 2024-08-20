@@ -10,7 +10,6 @@ import { query } from 'faunadb';
 import { SignatureCollectionProps } from './interfaces/signature-collection-props';
 import { User } from './interfaces/user';
 import { stripe } from './services/stripe';
-import { buffer } from './services/buffer';
 import Stripe from 'stripe';
 import { saveSignature } from './services/saveSignature';
 
@@ -51,15 +50,13 @@ export function app(): express.Express {
       .catch((err: any) => next(err));
   });
 
-
   server.post(
     '/api/v1/webhook',
     express.raw({ type: 'application/json' }),
     async (req, res) => {
-      const buf = await buffer(req);
       console.log('webhook received');
 
-      if('payload' in req) console.log(req['payload']);
+      if ('payload' in req) console.log(req['payload']);
 
       let dotenv = config().parsed;
       if (!dotenv) {
@@ -135,7 +132,6 @@ export function app(): express.Express {
       return res;
     }
   );
-
 
   server.use(express.json());
 
@@ -222,7 +218,7 @@ export function app(): express.Express {
     }
 
     try {
-      await fauna.query(
+      const user = await fauna.query(
         query.If(
           query.Not(
             query.Exists(
@@ -243,7 +239,7 @@ export function app(): express.Express {
           )
         )
       );
-
+      if('data' in user) return res.status(201).send({ data: user['data'] });
       return res.status(201).send();
     } catch (error) {
       return res.status(404).send({
@@ -341,7 +337,7 @@ export function app(): express.Express {
         await fauna.query(
           query.Update(query.Ref(query.Collection('users'), user.ref.id), {
             data: {
-              stripe_customer_id: stripeCustomer.id,
+              stripeCustomerId: stripeCustomer.id,
             },
           })
         );

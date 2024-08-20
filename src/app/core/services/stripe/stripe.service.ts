@@ -26,14 +26,17 @@ export class StripeService {
 
   public async getStripeCheckoutSession() {
     if(!this.stripejs) await this.loadStripe();
-    return this.oAuthService.user.pipe(
-      first(),
-      concatMap((user) => {
-        return this.http.post<ISessionId>('/api/v1/signature', {
-          email: user.email,
-        });
-      })
-    );
+    return this.http.post<ISessionId>('/api/v1/signature', {
+      email: this.oAuthService.user2.getValue().email,
+    });
+    // return this.oAuthService.user.pipe(
+    //   first(),
+    //   concatMap((user) => {
+    //     return this.http.post<ISessionId>('/api/v1/signature', {
+    //       email: user.email,
+    //     });
+    //   })
+    // );
   }
 
   public async redirectToCheckout() {

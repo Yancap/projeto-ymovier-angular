@@ -13,9 +13,12 @@ export class SignInComponent implements OnInit {
   public user!: AuthenticatedUser;
   constructor(private oAuthService: OAuthService) {}
   ngOnInit(): void {
-    this.oAuthService.user.subscribe((user) => {
+    this.oAuthService.user2.subscribe((user) => {
       this.user = user;
     })
+    // this.oAuthService.user.subscribe((user) => {
+    //   this.user = user;
+    // })
   }
   public login() {
     this.oAuthService.autorize();

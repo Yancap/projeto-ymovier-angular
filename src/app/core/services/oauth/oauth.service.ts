@@ -28,6 +28,12 @@ export class OAuthService {
   private readonly _client_id = environment.client_id;
   private _authCode!: string;
   public user: ReplaySubject<AuthenticatedUser> = new ReplaySubject(1);
+  public user2: BehaviorSubject<AuthenticatedUser> = new BehaviorSubject({
+    name: '',
+    email: '',
+    avatar_url: '',
+    isAuthenticated: false.valueOf(),
+  });
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -50,7 +56,13 @@ export class OAuthService {
       name: '',
       email: '',
       avatar_url: '',
-      isAuthenticated: false
+      isAuthenticated: false,
+    });
+    this.user2.next({
+      name: '',
+      email: '',
+      avatar_url: '',
+      isAuthenticated: false,
     });
   }
 
@@ -65,14 +77,20 @@ export class OAuthService {
             this.autorize();
             return of();
           }
-          tap(() =>
+          tap(() => {
             this.user.next({
               name: '',
               avatar_url: '',
               email: '',
               isAuthenticated: false,
-            })
-          );
+            });
+            this.user2.next({
+              name: '',
+              avatar_url: '',
+              email: '',
+              isAuthenticated: false,
+            });
+          });
           return throwError(() => ({
             message: 'Usuário ainda não autorizou!',
           }));
@@ -137,12 +155,52 @@ export class OAuthService {
         },
       })
       .pipe(
-        tap((user) => {
-          console.log(user);
+        concatMap((user) => {
+          return this.getSession(user.email).pipe(
+            tap(({ activeSignature }) => {
+              this.user.next({
+                name: user.name,
+                email: user.email,
+                avatar_url: user.avatar_url,
+                isAuthenticated: true,
+                signature: activeSignature,
+              });
+              this.user2.next({
+                name: user.name,
+                email: user.email,
+                avatar_url: user.avatar_url,
+                isAuthenticated: true,
+                signature: activeSignature,
+              });
+            }),
+            catchError((err) => {
+              this.user.next({
+                name: user.name,
+                email: user.email,
+                avatar_url: user.avatar_url,
+                isAuthenticated: true,
+              });
+              this.user2.next({
+                name: user.name,
+                email: user.email,
+                avatar_url: user.avatar_url,
+                isAuthenticated: true,
+              });
+              return throwError(() => ({
+                message: 'Erro na hora de buscar a assinatura!',
+                error: err,
+              }));
+            }),
+            map(() => ({ ...user, token }))
+          );
+        })
+        // tap((user) => {
+        //   console.log(user);
 
-          this.user.next({ ...user, isAuthenticated: true });
-        }),
-        map((user) => ({ ...user, token }))
+        //   this.user.next({ ...user, isAuthenticated: true });
+        //   this.user2.next({ ...user, isAuthenticated: true });
+        // }),
+        //map((user) => ({ ...user, token }))
       );
   }
 
@@ -155,6 +213,25 @@ export class OAuthService {
         take(1),
         catchError((err) => throwError(() => err))
       );
+  }
+
+  public getSession(email: string) {
+    return this.http.post<{ activeSignature: 'active' | 'canceled' | null }>(
+      '/api/v1/session',
+      {
+        email,
+      }
+    );
+    // .pipe(
+    //   take(1),
+    //   catchError((err) => throwError(() => err)),
+    //   tap(({ activeSignature }) =>
+    //     this.user2.next({
+    //       ...this.user2.getValue(),
+    //       signature: activeSignature,
+    //     })
+    //   )
+    // );
   }
 
   private handleError(error: IResponseGithubOAuthError) {}
