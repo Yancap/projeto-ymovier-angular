@@ -16,8 +16,6 @@ export class StripeService {
 
   private async loadStripe() {
     return loadStripe(environment.STRIPE_PUBLIC_KEY).then((instance) => {
-      console.log(instance);
-      console.log(environment.STRIPE_PUBLIC_KEY);
 
       if (instance) this.stripejs = instance;
       else throw new Error('Erro na configuração do StripeJS');
@@ -27,7 +25,7 @@ export class StripeService {
   public async getStripeCheckoutSession() {
     if(!this.stripejs) await this.loadStripe();
     return this.http.post<ISessionId>('/api/v1/signature', {
-      email: this.oAuthService.user2.getValue().email,
+      email: this.oAuthService.user.getValue().email,
     });
     // return this.oAuthService.user.pipe(
     //   first(),

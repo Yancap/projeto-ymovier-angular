@@ -4,22 +4,31 @@
     [style]="'background-color: ' + movie.main_color + 'B1;'"
     class="container-film"
   >
-    <img src="/close.svg" alt="X" height="20" width="20" (click)="closeModal()"/>
+    <img
+      src="/close.svg"
+      alt="X"
+      height="20"
+      width="20"
+      (click)="closeModal()"
+    />
     <div class="film" #iframeDiv></div>
   </div>
 </section>
 } @else {
-<section
-  class="section-modal"
-  #sectionModal
->
+<section class="section-modal" #sectionModal>
   <div
     class="container"
     [style]="'background-color: ' + movie.main_color + 'B1;'"
     #containerModal
   >
     <header>
-      <img src="/close.svg" alt="X" height="20" width="20" (click)="closeModal()"/>
+      <img
+        src="/close.svg"
+        alt="X"
+        height="20"
+        width="20"
+        (click)="closeModal()"
+      />
     </header>
     <div>
       <figure class="post">
@@ -61,17 +70,20 @@
           </div>
           }
         </div>
-        <button class="btn" (click)="watchMovie()">
-          <img
-            src="/play.svg"
-            alt="play"
-            width="16"
-            height="20"
-            class="mt-px"
-
-          />
-          Assistir
-        </button>
+        @if (this.user && this.user.signature === "active") {
+          <button class="btn" (click)="watchMovie()">
+            <img
+              src="/play.svg"
+              alt="play"
+              width="16"
+              height="20"
+              class="mt-px"
+            />
+            Assistir
+          </button>
+        } @else {
+          <button class="btn" (click)="signature()">Assine para assistir</button>
+        }
       </article>
     </div>
   </div>

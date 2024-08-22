@@ -54,9 +54,6 @@ export function app(): express.Express {
     '/api/v1/webhook',
     express.raw({ type: 'application/json' }),
     async (req, res) => {
-      console.log('webhook received');
-
-      if ('payload' in req) console.log(req['payload']);
 
       let dotenv = config().parsed;
       if (!dotenv) {
@@ -79,7 +76,6 @@ export function app(): express.Express {
           dotenv['STRIPE_WEBHOOK_SECRET'] as string
         );
 
-        console.log('EVENT');
 
         const relevantEvents = new Set([
           'checkout.session.completed',
@@ -93,7 +89,6 @@ export function app(): express.Express {
             switch (type) {
               case 'customer.subscription.updated':
               case 'customer.subscription.deleted':
-                console.log('customer.subscription.updated');
                 const signature = event.data.object as Stripe.Subscription;
                 signature_return = await saveSignature(
                   signature.id,
@@ -102,10 +97,8 @@ export function app(): express.Express {
                 );
                 break;
               case 'checkout.session.completed':
-                console.log('customer.subscription.completed');
                 const checkoutSession = event.data
                   .object as Stripe.Checkout.Session;
-                console.log(event.data.object);
                 signature_return = await saveSignature(
                   checkoutSession.subscription?.toString() as string,
                   checkoutSession.customer?.toString() as string,
@@ -116,15 +109,10 @@ export function app(): express.Express {
                 throw new Error('Unhandled event: ' + type);
             }
           } catch (error) {
-            console.log(error);
-
             return res.send({ error: 'Webhook handler failed.' });
           }
         }
       } catch (error) {
-        //console.log(error);
-        console.log('webhook error');
-
         return res.status(404).send('Webhook Error');
       }
       res.send({ received: true, signature: signature_return });
@@ -194,8 +182,6 @@ export function app(): express.Express {
 
   server.post('/api/v1/save_user', async (req, res) => {
     const { body } = req;
-    console.log('save_user');
-
     if (!('email' in body)) {
       return res.status(404).send({
         message: 'O corpo da requisição está inválido.',
@@ -327,13 +313,11 @@ export function app(): express.Express {
           )
         )
       );
-      console.log(user);
       let customerId = user.data.stripe_customer_id;
       if (!customerId) {
         const stripeCustomer = await stripe.customers.create({
           email,
         });
-        console.log(stripeCustomer);
         await fauna.query(
           query.Update(query.Ref(query.Collection('users'), user.ref.id), {
             data: {
@@ -353,7 +337,6 @@ export function app(): express.Express {
         success_url: dotenv['STRIPE_SUCCESS_URL'] as string,
         cancel_url: dotenv['STRIPE_CANCEL_URL'] as string,
       });
-      console.log(stripeCheckoutSession.id);
       return res.status(201).send({ sessionId: stripeCheckoutSession.id });
     } catch (error) {
       return res.status(500).send({

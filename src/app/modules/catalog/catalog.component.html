@@ -12,7 +12,7 @@
               <app-search />
             </div>
             <app-container-card>
-              @for (item of filterGenderPipe.transform(movies, 'Ação'); track
+              @for (item of movies; track
               $index) {
               <app-card [movie]="item" />
               }

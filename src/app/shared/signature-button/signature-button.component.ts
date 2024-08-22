@@ -25,8 +25,7 @@ export class SignatureButtonComponent implements OnInit, OnDestroy {
     private oAuthService: OAuthService
   ) {}
   ngOnInit(): void {
-    this.oAuthService.user2.subscribe((user) => {
-      console.log(this.oAuthService.user2.getValue());
+    this.oAuthService.user.subscribe((user) => {
       this.user = user;
     });
     // this.oAuthService.user.subscribe((user) => {

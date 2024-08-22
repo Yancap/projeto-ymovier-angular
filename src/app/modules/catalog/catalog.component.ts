@@ -47,8 +47,6 @@ export class CatalogComponent implements OnInit, AfterViewInit {
         pageSize: 100,
       }
     )) as unknown as IResponseMovies[];
-    console.log(response);
-
     this.movies = await response.map((movie) => ({
       slug: movie.uid,
       ...movie.data,

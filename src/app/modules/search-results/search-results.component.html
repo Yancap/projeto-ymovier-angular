@@ -12,9 +12,7 @@
               <app-search />
             </div>
             <div class="container_results">
-              @for (item of movies; track $index) {
-              <app-card [movie]="item" />
-              }
+              <app-card [movie]="item" *ngFor="let item of movies | async" />
             </div>
           </div>
         </section>

@@ -13,6 +13,10 @@ export class SearchComponent {
   constructor(private router: Router) {}
 
   public search() {
+  }
+
+  public preventDefault(event: Event) {
+    event.preventDefault();
     const searchTerm = this.inputElement.nativeElement.value;
 
     if (searchTerm)

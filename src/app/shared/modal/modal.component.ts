@@ -3,9 +3,13 @@ import {
   Component,
   ElementRef,
   Input,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { OAuthService } from '../../core/services/oauth/oauth.service';
+import { Subscription } from 'rxjs';
+import { StripeService } from '../../core/services/stripe/stripe.service';
 
 @Component({
   selector: 'app-modal',
@@ -14,19 +18,25 @@ import {
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.scss',
 })
-export class ModalComponent implements OnInit, AfterViewInit {
+export class ModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() public movie!: Movie;
   @Input() public closeModal!: () => void;
   @ViewChild('sectionModal') sectionModal!: ElementRef<HTMLSelectElement>;
   @ViewChild('containerModal') containerModal!: ElementRef<HTMLDivElement>;
   @ViewChild('iframeDiv') iframeDiv!: ElementRef<HTMLDivElement>;
   public viewMovie = false;
+  public user!: AuthenticatedUser;
+  public redirectToCheckoutSubscription!: Subscription;
 
-  constructor() {}
-  ngOnInit(): void {}
+  constructor(private oAuthService: OAuthService, private stripeService: StripeService) {}
+
+  ngOnInit(): void {
+    this.oAuthService.user.subscribe((user) => {
+      this.user = user;
+    });
+  }
 
   ngAfterViewInit(): void {
-    console.log(this.iframeDiv);
     if (this.iframeDiv) {
       this.iframeDiv.nativeElement.innerHTML = this.movie.iframe;
     }
@@ -47,5 +57,19 @@ export class ModalComponent implements OnInit, AfterViewInit {
         iframeDiv.innerHTML = this.movie.iframe;
       }
     }, 1);
+  }
+
+  public async signature() {
+    if (!this.user || !this.user.isAuthenticated) {
+      this.oAuthService.autorize();
+    } else {
+      this.redirectToCheckoutSubscription = (
+        await this.stripeService.redirectToCheckout()
+      ).subscribe();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.redirectToCheckoutSubscription?.unsubscribe();
   }
 }

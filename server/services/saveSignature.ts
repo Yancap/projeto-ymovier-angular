@@ -16,7 +16,6 @@ export async function saveSignature(
       )
     )
   );
-  console.log('userRef');
 
 
   const signature = await stripe.subscriptions.retrieve(subscriptionId);
@@ -28,12 +27,10 @@ export async function saveSignature(
   };
 
   if (createAction) {
-    console.log('createAction');
     await fauna.query(
       query.Create(query.Collection('signatures'), { data: signatureData })
     );
   } else {
-    console.log('Not createAction');
     await fauna.query(
       query.Replace(
         query.Select(

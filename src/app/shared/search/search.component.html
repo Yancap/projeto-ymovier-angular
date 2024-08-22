@@ -1,6 +1,6 @@
-<form>
+<form (submit)="preventDefault($event)">
   <input type="text" placeholder="Pesquisar" #input/>
-  <button type="button" (click)="search()">
+  <button type="submit">
     <img src="/search.svg" alt="search" height="16" width="16" />
   </button>
 </form>

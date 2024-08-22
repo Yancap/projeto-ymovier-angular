@@ -11,18 +11,19 @@ import { SearchComponent } from '../../shared/search/search.component';
 import { CardComponent } from '../../shared/card/card.component';
 import { PrismicService } from '../../core/services/prismic/prismic.service';
 import * as prismic from '@prismicio/client';
-import { Subscription } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 import { ModalService } from '../../core/services/modal/modal.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-search-results',
   standalone: true,
-  imports: [SearchComponent, CardComponent],
+  imports: [SearchComponent, CardComponent, CommonModule],
   templateUrl: './search-results.component.html',
   styleUrl: './search-results.component.scss',
 })
 export class SearchResultsComponent implements OnInit, OnDestroy {
-  public movies!: Movie[];
+  public movies: ReplaySubject<Movie[]> = new ReplaySubject();
   public subscription!: Subscription;
   @ViewChild('modal', { read: ViewContainerRef, static: true })
   modalContainer!: ViewContainerRef;
@@ -38,12 +39,12 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
           this.queryByTags(query['search']),
           this.queryByTitles(query['search']),
         ]);
+
         const responseWithoutDuplicates = this.removeDuplicate([
           ...response[0],
           ...response[1],
         ]);
-
-        this.movies = responseWithoutDuplicates.map((movie) => ({
+        this.movies.next(responseWithoutDuplicates.map((movie) => ({
           slug: movie.uid,
           ...movie.data,
           gender: movie.data.gender.map((gen) => gen.type).join(', '),
@@ -60,7 +61,8 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
               'class="iframe" '
             ),
           },
-        }));
+        })))
+
       });
     });
   }

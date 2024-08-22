@@ -28,7 +28,6 @@ export class AppComponent implements OnInit {
     private router: Router
   ) {}
   ngOnInit() {
-    //console.log(window.location);
     if (isPlatformBrowser(this.platformId)) {
       this.oAuthService.authenticate().subscribe();
     }

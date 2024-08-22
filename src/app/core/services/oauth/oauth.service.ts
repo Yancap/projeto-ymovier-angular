@@ -27,8 +27,8 @@ export class OAuthService {
   //private _redirect_uri: string = 'http://localhost:4000/';
   private readonly _client_id = environment.client_id;
   private _authCode!: string;
-  public user: ReplaySubject<AuthenticatedUser> = new ReplaySubject(1);
-  public user2: BehaviorSubject<AuthenticatedUser> = new BehaviorSubject({
+  //public user: ReplaySubject<AuthenticatedUser> = new ReplaySubject(1);
+  public user: BehaviorSubject<AuthenticatedUser> = new BehaviorSubject({
     name: '',
     email: '',
     avatar_url: '',
@@ -58,17 +58,10 @@ export class OAuthService {
       avatar_url: '',
       isAuthenticated: false,
     });
-    this.user2.next({
-      name: '',
-      email: '',
-      avatar_url: '',
-      isAuthenticated: false,
-    });
   }
 
   public authenticate() {
     const token = sessionStorage.getItem('token');
-    console.log(token);
     if (token) {
       return this.getUserData(token).pipe(
         catchError((error: IResponseGithubOAuthError) => {
@@ -84,28 +77,21 @@ export class OAuthService {
               email: '',
               isAuthenticated: false,
             });
-            this.user2.next({
-              name: '',
-              avatar_url: '',
-              email: '',
-              isAuthenticated: false,
-            });
           });
           return throwError(() => ({
             message: 'Usuário ainda não autorizou!',
           }));
         }),
         tap((data) => {
-          console.log(data);
           this.saveUserData(data.email).subscribe();
         })
       );
     }
     return this.accessToken().pipe(
+      first(),
       concatMap((data) => this.getUserData(data.access_token)),
       tap((data) => sessionStorage.setItem('token', data.token)),
       tap((data) => {
-        console.log(data);
         this.saveUserData(data.email).subscribe();
       })
     );
@@ -113,15 +99,11 @@ export class OAuthService {
   }
 
   public accessToken() {
-    console.log('chamou accessToken 1');
-
     return this.router.events.pipe(
       filter((e) => e instanceof NavigationStart),
       switchMap((event) => {
         const { url } = event;
         const hasQueryParam = /^([^?&]*\?code=[^&]*)$/.test(url);
-        console.log(url);
-        console.log(hasQueryParam);
 
         if (hasQueryParam) {
           this._authCode = url.split('=')[1];
@@ -147,7 +129,6 @@ export class OAuthService {
   }
 
   public getUserData(token: string) {
-    console.log('chamou getUserData');
     return this.http
       .get<IResponseAuthenticatedUser>('https://api.github.com/user', {
         headers: {
@@ -165,22 +146,9 @@ export class OAuthService {
                 isAuthenticated: true,
                 signature: activeSignature,
               });
-              this.user2.next({
-                name: user.name,
-                email: user.email,
-                avatar_url: user.avatar_url,
-                isAuthenticated: true,
-                signature: activeSignature,
-              });
             }),
             catchError((err) => {
               this.user.next({
-                name: user.name,
-                email: user.email,
-                avatar_url: user.avatar_url,
-                isAuthenticated: true,
-              });
-              this.user2.next({
                 name: user.name,
                 email: user.email,
                 avatar_url: user.avatar_url,
@@ -195,10 +163,9 @@ export class OAuthService {
           );
         })
         // tap((user) => {
-        //   console.log(user);
 
         //   this.user.next({ ...user, isAuthenticated: true });
-        //   this.user2.next({ ...user, isAuthenticated: true });
+        //   this.user.next({ ...user, isAuthenticated: true });
         // }),
         //map((user) => ({ ...user, token }))
       );
@@ -226,8 +193,8 @@ export class OAuthService {
     //   take(1),
     //   catchError((err) => throwError(() => err)),
     //   tap(({ activeSignature }) =>
-    //     this.user2.next({
-    //       ...this.user2.getValue(),
+    //     this.user.next({
+    //       ...this.user.getValue(),
     //       signature: activeSignature,
     //     })
     //   )
