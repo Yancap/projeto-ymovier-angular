@@ -1,5 +1,4 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component,  OnInit } from '@angular/core';
 import { OAuthService } from '../../core/services/oauth/oauth.service';
 
 @Component({
@@ -16,9 +15,6 @@ export class SignInComponent implements OnInit {
     this.oAuthService.user.subscribe((user) => {
       this.user = user;
     })
-    // this.oAuthService.user.subscribe((user) => {
-    //   this.user = user;
-    // })
   }
   public login() {
     this.oAuthService.autorize();

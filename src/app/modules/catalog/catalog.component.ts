@@ -2,9 +2,6 @@ import { FilterGenderPipe } from './../../core/pipes/filter-gender.pipe';
 import {
   AfterViewInit,
   Component,
-  ElementRef,
-  inject,
-  NgZone,
   OnInit,
   ViewChild,
   ViewContainerRef,

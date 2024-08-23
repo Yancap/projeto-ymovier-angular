@@ -28,7 +28,7 @@ export class ModalService {
   }
 
   closeModal(componentRef: ComponentRef<ModalComponent>) {
-    window.removeEventListener('keydown', (ev) => {});
+    window.removeEventListener('keydown', () => {});
     componentRef.destroy();
   }
 

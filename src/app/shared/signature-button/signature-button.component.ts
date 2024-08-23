@@ -28,9 +28,6 @@ export class SignatureButtonComponent implements OnInit, OnDestroy {
     this.oAuthService.user.subscribe((user) => {
       this.user = user;
     });
-    // this.oAuthService.user.subscribe((user) => {
-    //   this.user = user;
-    // });
   }
 
   public async signature() {

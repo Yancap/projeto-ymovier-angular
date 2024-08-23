@@ -12,9 +12,6 @@ export class SearchComponent {
   @ViewChild('input') inputElement!: ElementRef<HTMLInputElement>;
   constructor(private router: Router) {}
 
-  public search() {
-  }
-
   public preventDefault(event: Event) {
     event.preventDefault();
     const searchTerm = this.inputElement.nativeElement.value;

@@ -27,14 +27,6 @@ export class StripeService {
     return this.http.post<ISessionId>('/api/v1/signature', {
       email: this.oAuthService.user.getValue().email,
     });
-    // return this.oAuthService.user.pipe(
-    //   first(),
-    //   concatMap((user) => {
-    //     return this.http.post<ISessionId>('/api/v1/signature', {
-    //       email: user.email,
-    //     });
-    //   })
-    // );
   }
 
   public async redirectToCheckout() {
