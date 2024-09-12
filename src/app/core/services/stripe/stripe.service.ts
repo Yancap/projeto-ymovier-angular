@@ -10,27 +10,24 @@ import { HttpClient } from '@angular/common/http';
 })
 export class StripeService {
   public stripejs!: Stripe;
-  constructor(private oAuthService: OAuthService, private http: HttpClient) {
-
-  }
+  constructor(private oAuthService: OAuthService, private http: HttpClient) {}
 
   private async loadStripe() {
     return loadStripe(environment.STRIPE_PUBLIC_KEY).then((instance) => {
-
       if (instance) this.stripejs = instance;
       else throw new Error('Erro na configuração do StripeJS');
     });
   }
 
   public async getStripeCheckoutSession() {
-    if(!this.stripejs) await this.loadStripe();
-    return this.http.post<ISessionId>('/api/v1/signature', {
+    if (!this.stripejs) await this.loadStripe();
+    return this.http.post<ISessionId>('/api/signature', {
       email: this.oAuthService.user.getValue().email,
     });
   }
 
   public async redirectToCheckout() {
-    if(!this.stripejs) await this.loadStripe();
+    if (!this.stripejs) await this.loadStripe();
     return (await this.getStripeCheckoutSession()).pipe(
       tap(async ({ sessionId }) => {
         await this.stripejs.redirectToCheckout({ sessionId });

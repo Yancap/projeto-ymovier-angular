@@ -14,7 +14,6 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  title = 'projeto-ymovier-angular';
   constructor(
     private oAuthService: OAuthService,
     @Inject(PLATFORM_ID) private platformId: Object

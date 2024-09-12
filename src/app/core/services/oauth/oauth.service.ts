@@ -108,7 +108,7 @@ export class OAuthService {
         if (hasQueryParam) {
           this._authCode = url.split('=')[1];
           return this.http.post<IResponseGithubOAuth>(
-            '/api/v1/auth',
+            '/api/auth',
             {
               code: this._authCode,
             },
@@ -173,7 +173,7 @@ export class OAuthService {
 
   private saveUserData(email: string) {
     return this.http
-      .post('/api/v1/save_user', {
+      .post('/api/save_user', {
         email,
       })
       .pipe(
@@ -184,7 +184,7 @@ export class OAuthService {
 
   public getSession(email: string) {
     return this.http.post<{ activeSignature: 'active' | 'canceled' | null }>(
-      '/api/v1/session',
+      '/api/session',
       {
         email,
       }

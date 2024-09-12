@@ -51,10 +51,9 @@ export function app(): express.Express {
   });
 
   server.post(
-    '/api/v1/webhook',
+    '/api/webhook',
     express.raw({ type: 'application/json' }),
     async (req, res) => {
-
       let dotenv = config().parsed;
       if (!dotenv) {
         return res.status(404).send({
@@ -75,7 +74,6 @@ export function app(): express.Express {
           secret,
           dotenv['STRIPE_WEBHOOK_SECRET'] as string
         );
-
 
         const relevantEvents = new Set([
           'checkout.session.completed',
@@ -123,7 +121,7 @@ export function app(): express.Express {
 
   server.use(express.json());
 
-  server.post('/api/v1/auth', (req, res) => {
+  server.post('/api/auth', (req, res) => {
     const { body } = req;
     let dotenv = config().parsed;
     if (!dotenv) {
@@ -180,7 +178,7 @@ export function app(): express.Express {
       });
   });
 
-  server.post('/api/v1/save_user', async (req, res) => {
+  server.post('/api/save_user', async (req, res) => {
     const { body } = req;
     if (!('email' in body)) {
       return res.status(404).send({
@@ -225,7 +223,7 @@ export function app(): express.Express {
           )
         )
       );
-      if('data' in user) return res.status(201).send({ data: user['data'] });
+      if ('data' in user) return res.status(201).send({ data: user['data'] });
       return res.status(201).send();
     } catch (error) {
       return res.status(404).send({
@@ -239,7 +237,7 @@ export function app(): express.Express {
     }
   });
 
-  server.post('/api/v1/session', async (req, res) => {
+  server.post('/api/session', async (req, res) => {
     const { body } = req;
 
     if (!('email' in body)) {
@@ -281,7 +279,7 @@ export function app(): express.Express {
     }
   });
 
-  server.post('/api/v1/signature', async (req, res) => {
+  server.post('/api/signature', async (req, res) => {
     const { body } = req;
 
     let dotenv = config().parsed;
