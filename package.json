@@ -8,7 +8,8 @@
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:no-ssr": "ng serve"
+    "serve:no-ssr": "ng serve",
+    "serve:ssr:projeto-ymovier-angular": "node dist/projeto-ymovier-angular/server/server.mjs"
   },
   "private": true,
   "dependencies": {
