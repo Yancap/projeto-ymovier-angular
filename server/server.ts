@@ -107,9 +107,15 @@ export function app(): express.Express {
         status: 500,
       });
     }
+    console.log("dotenv");
+    console.log(dotenv);
+
 
     let client_id = dotenv['CLIENT_ID'];
     let client_secret = dotenv['CLIENT_SECRET'];
+
+    console.log("CLIENT_ID: ", client_id);
+    console.log("CLIENT_SECRET: ", client_secret);
 
     if (!('code' in body)) {
       return res.status(404).send({
@@ -141,8 +147,8 @@ export function app(): express.Express {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        host: 'localhost:4000',
-        origin: 'http://localhost:4000',
+        host: 'projeto-ymovier-angular.onrender.com',
+        origin: 'https://projeto-ymovier-angular.onrender.com',
       },
     })
     const json = await response.json();
@@ -350,7 +356,7 @@ function run(): void {
   // Start up the Node server
   const server = app();
   server.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
+    console.log(`Node Express server listening on ${port}`);
   });
 }
 
