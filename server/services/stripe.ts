@@ -9,7 +9,7 @@ const config: Stripe.StripeConfig = {
   },
 };
 
-let dotenv = configDotenv().parsed as DotenvParseOutput;
+let dotenv = (configDotenv().parsed && process.env) as DotenvParseOutput;
 
 const __KEY = dotenv['STRIPE_API_KEY'] as string;
 
