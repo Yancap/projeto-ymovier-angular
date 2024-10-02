@@ -29,7 +29,7 @@ export function app(): express.Express {
     '/api/webhook',
     express.raw({ type: 'application/json' }),
     async (req, res) => {
-      let dotenv = config().parsed;
+      let dotenv = config().parsed && process.env;
       if (!dotenv) {
         return res.status(404).send({
           message: 'Arquivo .env não configurado no servidor',
@@ -98,7 +98,7 @@ export function app(): express.Express {
 
   server.post('/api/auth', async (req, res) => {
     const { body } = req;
-    let dotenv = config().parsed;
+    let dotenv = config().parsed && process.env;
     if (!dotenv) {
       return res.status(404).send({
         message: 'Arquivo .env não configurado no servidor',
@@ -108,8 +108,6 @@ export function app(): express.Express {
       });
     }
 
-    console.log(config());
-    console.log(process.env);
     console.log("dotenv");
     console.log(dotenv);
 
@@ -262,7 +260,7 @@ export function app(): express.Express {
   server.post('/api/signature', async (req, res) => {
     const { body } = req;
 
-    let dotenv = config().parsed;
+    let dotenv = config().parsed && process.env;;
     if (!dotenv) {
       return res.status(404).send({
         message: 'Arquivo .env não configurado no servidor',
