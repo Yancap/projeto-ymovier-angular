@@ -121,7 +121,7 @@ export function app(): express.Express {
 
   server.use(express.json());
 
-  server.post('/api/auth', (req, res) => {
+  server.post('/api/auth', async (req, res) => {
     const { body } = req;
     let dotenv = config().parsed;
     if (!dotenv) {
@@ -160,7 +160,7 @@ export function app(): express.Express {
       code: body.code,
     });
 
-    return fetch('https://github.com/login/oauth/access_token', {
+    const response = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       body: bodyStringify,
       headers: {
@@ -170,12 +170,8 @@ export function app(): express.Express {
         origin: 'http://localhost:4000',
       },
     })
-      .then((response) => {
-        return response.json();
-      })
-      .then((response) => {
-        return res.send(response);
-      });
+    const json = await response.json();
+    return res.send(json);
   });
 
   server.post('/api/save_user', async (req, res) => {
