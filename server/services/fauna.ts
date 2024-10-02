@@ -4,5 +4,5 @@ import { config, DotenvParseOutput } from 'dotenv';
 let dotenv = config().parsed as DotenvParseOutput;
 
 export const fauna = new Client({
-    secret: dotenv['FAUNADB_KEY'] as string
+    secret: (dotenv['FAUNADB_KEY'] && process.env) as string
 })

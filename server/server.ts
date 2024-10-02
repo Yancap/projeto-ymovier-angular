@@ -108,15 +108,12 @@ export function app(): express.Express {
       });
     }
 
-    console.log("dotenv");
-    console.log(dotenv);
+
 
 
     let client_id = dotenv['CLIENT_ID'];
     let client_secret = dotenv['CLIENT_SECRET'];
 
-    console.log("CLIENT_ID: ", client_id);
-    console.log("CLIENT_SECRET: ", client_secret);
 
     if (!('code' in body)) {
       return res.status(404).send({
