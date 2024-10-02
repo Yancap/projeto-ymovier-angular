@@ -107,6 +107,9 @@ export function app(): express.Express {
         status: 500,
       });
     }
+
+    console.log(config());
+    console.log(process.env);
     console.log("dotenv");
     console.log(dotenv);
 
